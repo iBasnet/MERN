@@ -3,7 +3,7 @@ import mongoose, { mongo } from "mongoose";
 const connectDB = async () => {
 
     mongoose.connection.on('connected', () => (
-        console.log('Database connected')
+        console.log('Connected to MongoDB')
     ))
 
     await mongoose.connect(`${process.env.MONGO_URI}/mern-auth`);
