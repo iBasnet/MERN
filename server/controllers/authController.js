@@ -1,6 +1,7 @@
 import userModel from "../models/userModel.js";
 import bcrypt from 'bcryptjs';
 import jwt from "jsonwebtoken";
+import transporter from "../config/nodemailer.js";
 
 export const register = async (req, res) => {
 
@@ -31,6 +32,16 @@ export const register = async (req, res) => {
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
+
+        // sending welcome email
+        const mailOptions = {
+            from: process.env.SENDER_EMAIL,
+            to: email,
+            subject: 'Welcome to Basnetium™ 🙏',
+            text: `Thanks for registering, ${name}! Your account has been created with the email address: ${email}. Discover more from us.`
+        }
+
+        await transporter.sendMail(mailOptions);
 
         return res.json({ success: true });
     }
