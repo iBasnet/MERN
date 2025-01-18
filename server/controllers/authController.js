@@ -46,7 +46,7 @@ export const register = async (req, res) => {
         return res.json({ success: true });
     }
     catch (error) {
-        return res.json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: error.message });
     }
 }
 
