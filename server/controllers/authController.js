@@ -33,12 +33,35 @@ export const register = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
+        const htmlTemplate =
+            `
+            <div style="text-align: center;">
+                <h1>Thanks for registering, ${name}! 😊</h1>
+                <br>
+                <p>Your account has been created with the email address:</p>
+                <h1>${email}</h1>
+                <br>
+                <i>Discover more from us.</i>
+                <div style="margin: 1rem 0;">
+                    <a href="https://youtu.be/dQw4w9WgXcQ"><img style="max-width: 2rem;"
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/YouTube_social_red_circle_%282017%29.svg/1200px-YouTube_social_red_circle_%282017%29.svg.png"></a>
+                    <a href="https://youtu.be/dQw4w9WgXcQ"><img style="max-width: 2rem;"
+                            src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/discord-round-color-icon.png"></a>
+                    <a href="https://youtu.be/dQw4w9WgXcQ"><img style="max-width: 2rem;"
+                            src="https://upload.wikimedia.org/wikipedia/en/thumb/b/bd/Reddit_Logo_Icon.svg/220px-Reddit_Logo_Icon.svg.png"></a>
+                    <a href="https://youtu.be/dQw4w9WgXcQ"><img style="max-width: 2rem;"
+                            src="https://daily-now-res.cloudinary.com/image/upload/v1614088267/landing/Daily.dev_logo.png"></a>
+                </div>
+            </div>
+            `
+
         // sending welcome email
         const mailOptions = {
             from: process.env.SENDER_EMAIL,
             to: email,
             subject: 'Welcome to Basnetium™ 🙏',
-            text: `Thanks for registering, ${name}! Your account has been created with the email address: ${email}. Discover more from us.`
+            // text: `Thanks for registering, ${name}! Your account has been created with the email address: ${email}. Discover more from us.`
+            html: htmlTemplate
         }
 
         await transporter.sendMail(mailOptions);
