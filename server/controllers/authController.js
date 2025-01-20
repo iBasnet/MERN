@@ -126,3 +126,123 @@ export const logout = async (req, res) => {
         return res.json({ success: false, message: error.message });
     }
 }
+
+export const sendVerifyOtp = async (req, res) => {
+
+    const { userId, email } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ success: false, message: "userId is required!" })
+    }
+    if (!email) {
+        return res.status(400).json({ success: false, message: "email is required!" })
+    }
+
+    try {
+
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User doesn't exist" });
+        }
+
+        if (user.isAccountVerified) {
+            return res.status(400).json({ success: false, message: "User already verified" });
+        }
+
+        const otp = String(Math.floor(100000 + Math.random() * 900000));
+
+        user.verifyOtp = otp;
+        user.verifyOtpExpiresAt = Date.now() + 24 * 60 * 60 * 1000;
+
+        await user.save();
+
+        const htmlTemplate =
+            `
+        <div style="text-align: center">
+            <p>Your verification OTP is:</p>
+            <br>
+            <h1>${otp}</h1>
+            <br>
+            <i>Use it to verify your account.</i>
+        </div>
+        `
+
+        const mailOptions = {
+            from: process.env.SENDER_EMAIL,
+            to: email,
+            subject: 'Verify your account on Basnetium™ 😊',
+            html: htmlTemplate
+        }
+
+        await transporter.sendMail(mailOptions);
+
+        return res.status(200).json({ success: true });
+    }
+    catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+
+}
+
+export const verifyEmail = async (req, res) => {
+
+    const { userId, otp, email } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ success: false, message: "userId is required!" })
+    }
+    if (!otp) {
+        return res.status(400).json({ success: false, message: "OTP is missing" })
+    }
+    if (!email) {
+        return res.status(400).json({ success: false, message: "email is missing" })
+    }
+
+    try {
+
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User doesn't exist" });
+        }
+
+        if (user.verifyOtp === '' || user.verifyOtp !== otp) {
+            return res.status(400).json({ success: false, message: "Invalid OTP" });
+        }
+
+        if (user.verifyOtpExpiresAt < Date.now()) {
+            return res.status(400).json({ success: false, message: "OTP has expired" });
+        }
+
+        user.isAccountVerified = true;
+        user.verifyOtp = '';
+        user.verifyOtpExpiresAt = 0;
+
+        await user.save();
+
+        const htmlTemplate =
+            `
+            <div style="text-align: center">
+                <h1>Congratulations!</h1>
+                <p>Your account is now verified.</p>
+            </div>
+             `
+
+        const mailOptions = {
+            from: process.env.SENDER_EMAIL,
+            to: email,
+            subject: "Verification Successful 🎉🎊",
+            html: htmlTemplate
+        }
+
+        await transporter.sendMail(mailOptions);
+
+        return res.status(200).json({ success: true, message: 'Email has been verified' });
+
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+
+}
