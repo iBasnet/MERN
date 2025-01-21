@@ -240,7 +240,6 @@ export const verifyEmail = async (req, res) => {
 
         return res.status(200).json({ success: true, message: 'Email has been verified' });
 
-
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }
