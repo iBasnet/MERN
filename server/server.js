@@ -7,7 +7,6 @@ import authRouter from './routes/authRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 5172;
-connectDB();
 
 app.use(express.json());
 app.use(cookieParser());
@@ -17,4 +16,12 @@ app.use(cors({ credentials: true }));
 app.get('/', (req, res) => res.send('API Working!'))
 app.use('/api/auth', authRouter);
 
-app.listen(port, () => console.log(`Server is listening on port ${port}`));
+app.listen(port, () => {
+    try {
+        connectDB();
+        console.log(`Server is listening on port ${port}`);
+    }
+    catch (error) {
+        console.log('Error while starting server: ', error.message);
+    }
+});
